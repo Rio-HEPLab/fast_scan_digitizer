@@ -1,0 +1,10 @@
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\obj\Debug\Scan_Digitizer.csproj.AssemblyReference.cache
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\obj\Debug\Scan_Digitizer.csproj.CoreCompileInputs.cache
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\bin\Debug\Scan_Digitizer.exe.config
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\bin\Debug\Scan_Digitizer.exe
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\bin\Debug\Scan_Digitizer.pdb
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\bin\Debug\Thorlabs.MotionControl.PrivateInternal.dll
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\bin\Debug\Thorlabs.MotionControl.Tools.WPF.dll
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\obj\Debug\Scan_Dig.0DB6CBC2.Up2Date
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\obj\Debug\Scan_Digitizer.exe
+C:\Users\Vinícius\Desktop\PIBIC\scan_digitizer\Scan_Digitizer\Scan_Digitizer\obj\Debug\Scan_Digitizer.pdb
