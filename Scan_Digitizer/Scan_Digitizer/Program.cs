@@ -23,35 +23,12 @@ namespace Scan_Digitizer
             // ****** SUBSTITUIR O NÚMERO DE SÉRIE PELO DO DISPOSITIVO UTILIZADO ******
             string serialNo_ServoY = "27261089";
             string serialNo_ServoX = "27261487";
-
             // This instructs the DeviceManager to build and maintain the list of
             // devices connected.
             DeviceManagerCLI.BuildDeviceList();
             // This creates an instance of KCubeDCServo class, passing in the Serial Number parameter.
             KCubeDCServo ServoY = KCubeDCServo.CreateKCubeDCServo(serialNo_ServoY);
             KCubeDCServo ServoX = KCubeDCServo.CreateKCubeDCServo(serialNo_ServoX);
-            // We tell the user that we are opening connection to the device.
-            Console.WriteLine("Opening devices {0} and {1}", serialNo_ServoY, serialNo_ServoX);
-            // This connects to the device.
-            ServoX.Connect(serialNo_ServoX);
-            ServoY.Connect(serialNo_ServoY);
-            // Wait for the device settings to initialize. We ask the device to
-            // throw an exception if this takes more than 5000ms (5s) to complete.
-            ServoX.WaitForSettingsInitialized(5000);
-            ServoY.WaitForSettingsInitialized(5000);
-            // This calls LoadMotorConfiguration on the device to initialize the DeviceUnitConverter object required for real world unit parameters.
-            MotorConfiguration motorSettings_ServoX = ServoX.LoadMotorConfiguration(serialNo_ServoX, DeviceConfiguration.DeviceSettingsUseOptionType.UseFileSettings);
-            MotorConfiguration motorSettings_ServoY = ServoY.LoadMotorConfiguration(serialNo_ServoY, DeviceConfiguration.DeviceSettingsUseOptionType.UseFileSettings);
-            // This starts polling the device at intervals of 250ms (0.25s).
-            ServoX.StartPolling(250);
-            ServoY.StartPolling(250);
-            // We are now able to Enable the device otherwise any move is ignored. You should see a physical response from your controller.
-            ServoX.EnableDevice();
-            ServoY.EnableDevice();
-            Console.WriteLine("Servo Motors Enabled");
-            // Needs a delay to give time for the device to be enabled.
-            Thread.Sleep(500);
-            
 
             // Configure digitizer
             if (Convert.ToBoolean(Digitizer.Configure()))
@@ -66,6 +43,9 @@ namespace Scan_Digitizer
 
             //Objeto Scan
             Scan scanDigitizer = new Scan();
+
+            //Prepara os motores para o scan
+            scanDigitizer.ServosInit(ServoX, ServoY, serialNo_ServoX, serialNo_ServoY);
 
             //Pede ao usuario os parametros para executar o scan
             scanDigitizer.GetParameters();

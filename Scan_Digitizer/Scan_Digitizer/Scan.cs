@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Thorlabs.MotionControl.DeviceManagerCLI;
 using Thorlabs.MotionControl.GenericMotorCLI;
+using Thorlabs.MotionControl.GenericMotorCLI.Settings;
 using Thorlabs.MotionControl.KCube.DCServoCLI;
 
 namespace Scan_Digitizer
 {
     internal class Scan
     {
+        //Scan variables
         decimal initialPositionX = 0;
         decimal initialPositionY = 0;
         const decimal stepInferiorLimit = 0.001m;
@@ -22,6 +26,30 @@ namespace Scan_Digitizer
         decimal finalPositionX = 0;
         decimal finalPositionY = 0;
 
+        public void ServosInit(KCubeDCServo ServoX, KCubeDCServo ServoY, string serialNo_ServoX, string serialNo_ServoY)
+        {
+            // We tell the user that we are opening connection to the device.
+            Console.WriteLine("Opening devices {0} and {1}", serialNo_ServoY, serialNo_ServoX);
+            // This connects to the device.
+            ServoX.Connect(serialNo_ServoX);
+            ServoY.Connect(serialNo_ServoY);
+            // Wait for the device settings to initialize. We ask the device to
+            // throw an exception if this takes more than 5000ms (5s) to complete.
+            ServoX.WaitForSettingsInitialized(5000);
+            ServoY.WaitForSettingsInitialized(5000);
+            // This calls LoadMotorConfiguration on the device to initialize the DeviceUnitConverter object required for real world unit parameters.
+            MotorConfiguration motorSettings_ServoX = ServoX.LoadMotorConfiguration(serialNo_ServoX, DeviceConfiguration.DeviceSettingsUseOptionType.UseFileSettings);
+            MotorConfiguration motorSettings_ServoY = ServoY.LoadMotorConfiguration(serialNo_ServoY, DeviceConfiguration.DeviceSettingsUseOptionType.UseFileSettings);
+            // This starts polling the device at intervals of 250ms (0.25s).
+            ServoX.StartPolling(250);
+            ServoY.StartPolling(250);
+            // We are now able to Enable the device otherwise any move is ignored. You should see a physical response from your controller.
+            ServoX.EnableDevice();
+            ServoY.EnableDevice();
+            Console.WriteLine("Servo Motors Enabled");
+            // Needs a delay to give time for the device to be enabled.
+            Thread.Sleep(500);
+        }
 
         public void GetParameters()
         {
@@ -176,75 +204,6 @@ namespace Scan_Digitizer
             }
         }
 
-       /* public void Execute(KCubeDCServo ServoX, KCubeDCServo ServoY)
-        {
-            string dir = AppDomain.CurrentDomain.BaseDirectory;
-            string path = Path.Combine(dir, "scan_Digitizer.txt");
-
-            Console.WriteLine("Scan initiated");
-            decimal PositionX;
-            decimal PositionY;
-            int amplitude;
-            string amp = "";
-
-
-            //Escreve o cabecalho do arquivo de saida
-            //OutputFile.WriteHeader();
-
-            //Move os servos para a posição inicial
-            Console.WriteLine("Moving to initial position...");
-            ServoX.MoveTo(initialPositionX, 60000);
-            ServoY.MoveTo(initialPositionY, 60000);
-
-            //Move relativo a posição inicial
-            Console.WriteLine("Scan in execution...");
-
-            for (int i = 0; i <= numStepsY; i++)
-            {
-                PositionY = i * stepY;
-
-                for (int j = 0; j <= numStepsX; j++)
-                {
-                    amplitude = Digitizer.GetMinValue();
-                    PositionX = j * stepX;
-
-                    Console.WriteLine("Amplitude: " + amplitude);
-                    Console.WriteLine("Posicao X: " + PositionX);
-                    Console.WriteLine("Posicao Y: " + PositionY);
-
-                    //Escreve o evento no arquivo de saída
-                    //OutputFile.WriteEvent(PositionX, PositionY, amplitude);
-
-                    using (StreamWriter sw = new StreamWriter(path))
-                    {
-                        amp = amplitude.ToString();
-                        sw.Write(amp);
-                    }
-
-                    if (j != numStepsX)
-                    {
-                        using (StreamWriter sw = new StreamWriter(path))
-                        {
-                            sw.Write('\t');
-                        }
-                        ServoX.MoveRelative(MotorDirection.Forward, stepX, 60000);
-                    }
-                }
-
-                using (StreamWriter sw = new StreamWriter(path))
-                {
-                    sw.Write('\n');
-                }
-
-                ServoX.MoveTo(initialPositionX, 60000);
-                if (i != numStepsY)
-                {
-                    ServoY.MoveRelative(MotorDirection.Forward, stepY, 60000);
-                }
-            }
-
-            Console.WriteLine("Scan Finished");
-        }*/
 
         public void Execute(KCubeDCServo ServoX, KCubeDCServo ServoY)
         {
