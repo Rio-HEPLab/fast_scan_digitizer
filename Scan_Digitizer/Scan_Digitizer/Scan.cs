@@ -257,6 +257,10 @@ namespace Scan_Digitizer
             int amplitude;
             string amp = "";
 
+            // Home the stage/ actuator.
+            Console.WriteLine("Actuator is Homing");
+            ServoX.Home(60000);
+            ServoY.Home(60000);
 
             //Escreve o cabecalho do arquivo de saida
             //OutputFile.WriteHeader();

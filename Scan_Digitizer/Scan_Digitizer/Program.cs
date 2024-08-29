@@ -51,10 +51,7 @@ namespace Scan_Digitizer
             Console.WriteLine("Servo Motors Enabled");
             // Needs a delay to give time for the device to be enabled.
             Thread.Sleep(500);
-            // Home the stage/ actuator.
-            Console.WriteLine("Actuator is Homing");
-            ServoX.Home(60000);
-            ServoY.Home(60000);
+            
 
             // Configure digitizer
             if (Convert.ToBoolean(Digitizer.Configure()))
