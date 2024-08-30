@@ -25,6 +25,190 @@ namespace Scan_Digitizer
         const decimal positionLimit = 45;
         decimal finalPositionX = 0;
         decimal finalPositionY = 0;
+        string input;
+
+        private bool Confirmation()
+        {
+            string confirmationInput;
+
+            while (true)
+            {
+                confirmationInput = Console.ReadLine();
+
+                if (String.Equals(confirmationInput, "yes", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+                else if (String.Equals(confirmationInput, "no", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+                else { continue; }
+            }
+        }
+
+        private void getInitialX()  //pede posição inicial de X
+        {
+            bool error = true;
+            while (error)
+            {
+                Console.Write("Set X initial position: ");
+                input = Console.ReadLine();
+
+                if (decimal.TryParse(input, out initialPositionX))
+                {
+                    if (initialPositionX < positionLimit) //limite de segurança para posição
+                    {
+                        error = !error;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja menor que o limite de segurança.\nLimite de segurança = " + positionLimit);
+                    }
+
+                }
+                else
+                {
+                    Console.WriteLine("Entrada inválida. Certifique-se de digitar um número válido.\n");
+                }
+            }
+        }
+
+        private void getInitialY()  //pede posição inicial de Y
+        {
+            bool error = true;
+            while (error)
+            {
+                Console.Write("Set Y initial position: ");
+                input = Console.ReadLine();
+
+                if (decimal.TryParse(input, out initialPositionY))
+                {
+                    if (initialPositionY < positionLimit) //limite de segurança para posição
+                    {
+                        error = !error;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja menor que o limite de segurança.\nLimite de segurança = " + positionLimit);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Entrada inválida. Certifique-se de digitar um número válido.\n");
+                }
+            }
+        }
+
+        private void getFinalX()    //pede posição final de X
+        {
+            bool error = true;
+            while (error)
+            {
+                Console.Write("Set X final position: ");
+                input = Console.ReadLine();
+
+                if (decimal.TryParse(input, out finalPositionX))
+                {
+                    if (finalPositionX < positionLimit & finalPositionX > initialPositionX)
+                    {
+                        error = !error;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja menor que o limite de segurança e maior do que o valor de posição inicial.\nLimite de segurança = " + positionLimit);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Entrada invalida. Certifique-se de digitar um numero valido.\n");
+                }
+            }
+        }
+
+        private void getFinalY()    //pede posição final de Y
+        {
+            bool error = true;
+            while (error)
+            {
+                Console.Write("Set Y final position: ");
+                input = Console.ReadLine();
+
+                if (decimal.TryParse(input, out finalPositionY))
+                {
+                    if (finalPositionX < positionLimit & finalPositionX > initialPositionX)
+                    {
+                        error = !error;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja menor que o limite de segurança e maior do que o valor de posição inicial.\nLimite de segurança = " + positionLimit);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Entrada invalida. Certifique-se de digitar um numero valido.\n");
+                }
+            }
+        }
+
+        private void getPaceX()     //determina o passo em X
+        {
+            bool error = true;
+            while (error)
+            {
+                Console.WriteLine("Insira o numero de medicoes para a direcao x: ");
+                input = Console.ReadLine();
+
+                if (int.TryParse(input, out numStepsX))
+                {
+                    numStepsX--;
+                    stepX = (finalPositionX - initialPositionX) / numStepsX;
+
+                    if (stepX > stepInferiorLimit)
+                    {
+                        error = !error;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja maior que o limite inferior de valor de passo.\nLimite inferior de valor de passo = " + stepInferiorLimit);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Entrada invalida. Certifique-se de digitar um numero valido.\n");
+                }
+            }
+        }
+
+        private void getPaceY()     //determina o passo em Y
+        {
+            bool error = true;
+            while (error)
+            {
+                Console.WriteLine("Insira o numero de medicoes que devem ser feitas entre os limites dados (numero de passos) para a direcao y: ");
+                input = Console.ReadLine();
+
+                if (int.TryParse(input, out numStepsY))
+                {
+                    numStepsY--;
+                    stepY = (finalPositionY - initialPositionY) / numStepsY;
+
+                    if (stepY > stepInferiorLimit)
+                    {
+                        error = !error;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja maior que o limite inferior de valor de passo.\nLimite inferior de valor de passo = " + stepInferiorLimit);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Entrada invalida. Certifique-se de digitar um numero valido.\n");
+                }
+            }
+        }
 
         public void ServosInit(KCubeDCServo ServoX, KCubeDCServo ServoY, string serialNo_ServoX, string serialNo_ServoY)
         {
@@ -53,157 +237,29 @@ namespace Scan_Digitizer
 
         public void GetParameters()
         {
-            bool error = true;
-            string input;
-            //pede ao usuário a posição inicial de x
-            while (error)
+            bool confirmation = false;
+
+            while (!confirmation)
             {
-                Console.Write("Set X initial position: ");
-                input = Console.ReadLine();
-
-                if (decimal.TryParse(input, out initialPositionX))
-                {
-                    if (initialPositionX < positionLimit) //limite de segurança para posição
-                    {
-                        error = !error;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja menor que o limite de segurança.\nLimite de segurança = " + positionLimit);
-                    }
-
-                }
-                else
-                {
-                    Console.WriteLine("Entrada inválida. Certifique-se de digitar um número válido.\n");
-                }
+                //pede ao usuário a posição inicial de x
+                getInitialX();
+                //pede ao usuário a posição inicial de y
+                getInitialY();
+                //pede ao usuário a posição final de x
+                getFinalX();
+                //pede ao usuário a posição final de y
+                getFinalY();
+                //define o valor do passo em x
+                getPaceX();
+                //define o valor do passo em y
+                getPaceY();
+                //pede confirmação dos parâmetros
+                Console.Write("Confirm parameters? [Yes/No]: ");
+                confirmation = Confirmation();
             }
 
-
-            //pede ao usuário a posição inicial de y
-            while (!error)
-            {
-                Console.Write("Set Y initial position: ");
-                input = Console.ReadLine();
-
-                if (decimal.TryParse(input, out initialPositionY))
-                {
-                    if (initialPositionY < positionLimit) //limite de segurança para posição
-                    {
-                        error = !error;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja menor que o limite de segurança.\nLimite de segurança = " + positionLimit);
-                    }
-
-                }
-                else
-                {
-                    Console.WriteLine("Entrada inválida. Certifique-se de digitar um número válido.\n");
-                }
-            }
-
-            //pede ao usuário a posição final de x
-            while (error)
-            {
-
-                Console.Write("Set X final position: ");
-                input = Console.ReadLine();
-
-                if (decimal.TryParse(input, out finalPositionX))
-                {
-                    if (finalPositionX < positionLimit & finalPositionX > initialPositionX)
-                    {
-                        error = !error;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja menor que o limite de segurança e maior do que o valor de posição inicial.\nLimite de segurança = " + positionLimit);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Entrada invalida. Certifique-se de digitar um numero valido.\n");
-                }
-            }
-
-            //pede ao usuário a posição final de y
-            while (!error)
-            {
-                Console.Write("Set Y final position: ");
-                input = Console.ReadLine();
-
-                if (decimal.TryParse(input, out finalPositionY))
-                {
-                    if (finalPositionX < positionLimit & finalPositionX > initialPositionX)
-                    {
-                        error = !error;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja menor que o limite de segurança e maior do que o valor de posição inicial.\nLimite de segurança = " + positionLimit);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Entrada invalida. Certifique-se de digitar um numero valido.\n");
-                }
-            }
-
-            //define o valor do passo em x
-            while (error)
-            {
-                Console.WriteLine("Insira o numero de medicoes para a direcao x: ");
-                input = Console.ReadLine();
-
-                if (int.TryParse(input, out numStepsX))
-                {
-                    numStepsX--;
-                    stepX = (finalPositionX - initialPositionX) / numStepsX;
-
-                    if (stepX > stepInferiorLimit)
-                    {
-                        error = !error;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja maior que o limite inferior de valor de passo.\nLimite inferior de valor de passo = " + stepInferiorLimit);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Entrada invalida. Certifique-se de digitar um numero valido.\n");
-                }
-            }
-
-            //define o valor do passo em y
-            while (!error)
-            {
-                Console.WriteLine("Insira o numero de medicoes que devem ser feitas entre os limites dados (numero de passos) para a direcao y: ");
-                input = Console.ReadLine();
-
-                if (int.TryParse(input, out numStepsY))
-                {
-                    numStepsY--;
-                    stepY = (finalPositionY - initialPositionY) / numStepsY;
-
-                    if (stepY > stepInferiorLimit)
-                    {
-                        error = !error;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Entrada inválida. Certifique-se de que o valor de entrada seja maior que o limite inferior de valor de passo.\nLimite inferior de valor de passo = " + stepInferiorLimit);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Entrada invalida. Certifique-se de digitar um numero valido.\n");
-                }
-            }
+            
         }
-
 
         public void Execute(KCubeDCServo ServoX, KCubeDCServo ServoY)
         {
@@ -253,7 +309,7 @@ namespace Scan_Digitizer
 
                         //Escreve o evento no arquivo de saída
                         //OutputFile.WriteEvent(PositionX, PositionY, amplitude);
-                        
+
                         amp = amplitude.ToString();
                         sw.Write(amp);
 
@@ -263,7 +319,7 @@ namespace Scan_Digitizer
                             ServoX.MoveRelative(MotorDirection.Forward, stepX, 60000);
                         }
                     }
-                    
+
                     sw.Write('\n');
                     ServoX.MoveTo(initialPositionX, 60000);
                     if (i != numStepsY)
@@ -275,5 +331,7 @@ namespace Scan_Digitizer
 
             Console.WriteLine("Scan Finished");
         }
+
+
     }
 }
