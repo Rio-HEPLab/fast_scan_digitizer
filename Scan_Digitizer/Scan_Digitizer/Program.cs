@@ -17,6 +17,7 @@ namespace Scan_Digitizer
     {
         static void Main(string[] args)
         {
+            bool runScan = true;
             // We create the serial number string of your connected controller. This will
             // be used as an argument for LoadMotorConfiguration(). You can replace this
             // serial number with the number printed on your device.
@@ -48,10 +49,19 @@ namespace Scan_Digitizer
             //Prepara os motores para o scan
             scanDigitizer.ServosInit(ServoX, ServoY, serialNo_ServoX, serialNo_ServoY);
 
+            //executa o scan da primeira vez
+            //caso queira executar novamente executa sem o homing das próximas vezes
+            while (runScan)
+            {
+                //extrai os parametros para o scan
+                scanDigitizer.GetParameters();
+                //Executa o Scan
+                scanDigitizer.Execute(ServoX, ServoY);
+                //da a opção de realizar mais um scan
+                runScan = scanDigitizer.ContinueScan();
+            }
             //Pede ao usuario os parametros para executar o scan
-            scanDigitizer.GetParameters();
-            //Executa o Scan
-            scanDigitizer.Execute(ServoX, ServoY);
+
 
             //ENCERRA O PROGRAMA
             scanDigitizer.Finish(ServoX, ServoY);

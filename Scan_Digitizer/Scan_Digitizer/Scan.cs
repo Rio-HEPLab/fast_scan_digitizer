@@ -27,6 +27,7 @@ namespace Scan_Digitizer
         decimal finalPositionY = 0;
         string input;
         string outputFile = "scan_Digitizer.txt";
+        bool runHome = true;
 
         private bool Confirmation()
         {
@@ -217,6 +218,18 @@ namespace Scan_Digitizer
             outputFile = Console.ReadLine() + ".txt";
         } 
 
+        public bool ContinueScan()
+        {
+            Console.Write("Do you want to run another scan? [Yes/No]: ");
+            if (Confirmation())
+            {
+                Console.WriteLine("Choose the paremeters for your new scan");
+                runHome = false;
+                return true;
+            }
+            else { return false; }
+        }
+
         public void ServosInit(KCubeDCServo ServoX, KCubeDCServo ServoY, string serialNo_ServoX, string serialNo_ServoY)
         {
             // We tell the user that we are opening connection to the device.
@@ -281,10 +294,13 @@ namespace Scan_Digitizer
             int amplitude;
             string amp = "";
 
-            // Home the stage/ actuator.
-            Console.WriteLine("Actuator is Homing");
-            ServoX.Home(60000);
-            ServoY.Home(60000);
+            if (runHome)
+            {
+                // Home the stage/ actuator.
+                Console.WriteLine("Actuator is Homing");
+                ServoX.Home(60000);
+                ServoY.Home(60000);
+            }
 
             //Escreve o cabecalho do arquivo de saida
             //OutputFile.WriteHeader();
