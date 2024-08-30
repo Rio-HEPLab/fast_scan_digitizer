@@ -211,11 +211,11 @@ namespace Scan_Digitizer
             }
         }
 
-        private void nameOutputFile()
+        private void nameOutputFile()   //da o nome para o arquivo de output
         {
             Console.Write("Please name your output file (without extension): ");
             outputFile = Console.ReadLine() + ".txt";
-        }
+        } 
 
         public void ServosInit(KCubeDCServo ServoX, KCubeDCServo ServoY, string serialNo_ServoX, string serialNo_ServoY)
         {
@@ -265,8 +265,8 @@ namespace Scan_Digitizer
                 Console.Write("Confirm parameters? [Yes/No]: ");
                 confirmation = Confirmation();
             }
-
-            
+            //pede nome para o arquivo de output
+            nameOutputFile();
         }
 
         public void Execute(KCubeDCServo ServoX, KCubeDCServo ServoY)

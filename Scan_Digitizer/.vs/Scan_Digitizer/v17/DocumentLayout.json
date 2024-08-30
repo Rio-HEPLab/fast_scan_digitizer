@@ -3,11 +3,11 @@
   "WorkspaceRootPath": "C:\\Users\\Vin\u00EDcius\\Desktop\\PIBIC\\Github\\fast_scan_digitizer\\Scan_Digitizer\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D35EF424-809E-43F3-9730-644675D3F16E}|Scan_Digitizer\\Scan_Digitizer.csproj|C:\\Users\\Vin\u00EDcius\\Desktop\\PIBIC\\Github\\fast_scan_digitizer\\Scan_Digitizer\\scan_digitizer\\scan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D35EF424-809E-43F3-9730-644675D3F16E}|Scan_Digitizer\\Scan_Digitizer.csproj|c:\\users\\vin\u00EDcius\\desktop\\pibic\\github\\fast_scan_digitizer\\scan_digitizer\\scan_digitizer\\scan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D35EF424-809E-43F3-9730-644675D3F16E}|Scan_Digitizer\\Scan_Digitizer.csproj|solutionrelative:scan_digitizer\\scan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D35EF424-809E-43F3-9730-644675D3F16E}|Scan_Digitizer\\Scan_Digitizer.csproj|c:\\users\\vin\u00EDcius\\desktop\\pibic\\github\\fast_scan_digitizer\\scan_digitizer\\scan_digitizer\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D35EF424-809E-43F3-9730-644675D3F16E}|Scan_Digitizer\\Scan_Digitizer.csproj|C:\\Users\\Vin\u00EDcius\\Desktop\\PIBIC\\Github\\fast_scan_digitizer\\Scan_Digitizer\\scan_digitizer\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D35EF424-809E-43F3-9730-644675D3F16E}|Scan_Digitizer\\Scan_Digitizer.csproj|solutionrelative:scan_digitizer\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -32,7 +32,7 @@
               "RelativeDocumentMoniker": "Scan_Digitizer\\Scan.cs",
               "ToolTip": "C:\\Users\\Vin\u00EDcius\\Desktop\\PIBIC\\Github\\fast_scan_digitizer\\Scan_Digitizer\\Scan_Digitizer\\Scan.cs",
               "RelativeToolTip": "Scan_Digitizer\\Scan.cs",
-              "ViewState": "AQIAANUAAAAAAAAAAAAqwNgAAAA1AAAA",
+              "ViewState": "AQIAAPUAAAAAAAAAAAAQwAwBAAAdAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-21T18:04:38.472Z",
               "EditorCaption": ""
@@ -59,8 +59,7 @@
               "RelativeToolTip": "Scan_Digitizer\\Program.cs",
               "ViewState": "AQIAACIAAAAAAAAAAAAQwDgAAAAxAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-21T17:57:04.998Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-21T17:57:04.998Z"
             }
           ]
         }
