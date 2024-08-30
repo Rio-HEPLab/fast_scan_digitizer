@@ -30,19 +30,20 @@ namespace Scan_Digitizer
             KCubeDCServo ServoY = KCubeDCServo.CreateKCubeDCServo(serialNo_ServoY);
             KCubeDCServo ServoX = KCubeDCServo.CreateKCubeDCServo(serialNo_ServoX);
 
+            //Objeto Scan
+            Scan scanDigitizer = new Scan();
+
             // Configure digitizer
             if (Convert.ToBoolean(Digitizer.Configure()))
             {
                 Console.WriteLine("Nao foi possivel configurar o dispositivo corretamente.");
-                goto QuitProgram;
+                scanDigitizer.Finish(ServoX, ServoY);
+                return;
             }
             else
             {
                 Console.WriteLine("Digitalizador configurado");
             }
-
-            //Objeto Scan
-            Scan scanDigitizer = new Scan();
 
             //Prepara os motores para o scan
             scanDigitizer.ServosInit(ServoX, ServoY, serialNo_ServoX, serialNo_ServoY);
@@ -52,20 +53,8 @@ namespace Scan_Digitizer
             //Executa o Scan
             scanDigitizer.Execute(ServoX, ServoY);
 
-        //ENCERRA O PROGRAMA
-        QuitProgram:
-            Console.WriteLine("Press any key to exit");
-            Console.ReadKey();
-
-            // Stop polling the device.
-            ServoY.StopPolling();
-            ServoX.StopPolling();
-            // This shuts down the controller. This will use the Disconnect() function to close communications &will then close the used library.
-            ServoY.ShutDown();
-            ServoX.ShutDown();
-
-            //encerra o QDC
-            Digitizer.Close();
+            //ENCERRA O PROGRAMA
+            scanDigitizer.Finish(ServoX, ServoY);
         }
     }
 }
