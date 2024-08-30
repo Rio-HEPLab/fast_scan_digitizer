@@ -332,6 +332,21 @@ namespace Scan_Digitizer
             Console.WriteLine("Scan Finished");
         }
 
+        public void Finish(KCubeDCServo ServoX, KCubeDCServo ServoY)
+        {
+            Console.WriteLine("Press any key to exit");
+            Console.ReadKey();
+
+            // Stop polling the device.
+            ServoY.StopPolling();
+            ServoX.StopPolling();
+            // This shuts down the controller. This will use the Disconnect() function to close communications &will then close the used library.
+            ServoY.ShutDown();
+            ServoX.ShutDown();
+
+            //encerra o QDC
+            Digitizer.Close();
+        }
 
     }
 }
