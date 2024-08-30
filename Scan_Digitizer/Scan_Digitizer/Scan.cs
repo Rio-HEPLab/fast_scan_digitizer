@@ -26,6 +26,7 @@ namespace Scan_Digitizer
         decimal finalPositionX = 0;
         decimal finalPositionY = 0;
         string input;
+        string outputFile = "scan_Digitizer.txt";
 
         private bool Confirmation()
         {
@@ -210,6 +211,12 @@ namespace Scan_Digitizer
             }
         }
 
+        private void nameOutputFile()
+        {
+            Console.Write("Please name your output file (without extension): ");
+            outputFile = Console.ReadLine() + ".txt";
+        }
+
         public void ServosInit(KCubeDCServo ServoX, KCubeDCServo ServoY, string serialNo_ServoX, string serialNo_ServoY)
         {
             // We tell the user that we are opening connection to the device.
@@ -234,6 +241,7 @@ namespace Scan_Digitizer
             // Needs a delay to give time for the device to be enabled.
             Thread.Sleep(500);
         }
+
 
         public void GetParameters()
         {
@@ -264,7 +272,8 @@ namespace Scan_Digitizer
         public void Execute(KCubeDCServo ServoX, KCubeDCServo ServoY)
         {
             string dir = AppDomain.CurrentDomain.BaseDirectory;
-            string path = Path.Combine(dir, "scan_Digitizer.txt");
+            //string dir = "../Output";
+            string path = Path.Combine(dir, outputFile);
 
             Console.WriteLine("Scan initiated");
             decimal PositionX;
