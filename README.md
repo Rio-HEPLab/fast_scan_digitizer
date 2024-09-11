@@ -12,3 +12,7 @@ Na pasta bin está localizado o arquivo executável do programa, bem como todas 
 Ao inciar o programa, os dispositivos serão conectados e em seguida os motores de passo executarão o homming. Então o programa solicitará ao usuário os dados para realizar o scan. Note que as distâncias devem ser fornecidas em milímetros com as casas decimais separadas por vírgula. Ao terminar o scan, o resultado pode ser acessado através do documento "scan_Digitizer.tsv" que possui em seu conteúdo o tamanho dos passos utilizados em cada direção e a amplitude medida em cada posição.
 
 # DigitizerLib
+
+# Scan Analysis
+Códigos em python utilizados para gerar gráficos a partir dos arquivos .txt gerados pelo Scan_Digitizer.
+
