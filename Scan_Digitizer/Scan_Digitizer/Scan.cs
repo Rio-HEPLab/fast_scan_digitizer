@@ -284,8 +284,18 @@ namespace Scan_Digitizer
 
         public void Execute(KCubeDCServo ServoX, KCubeDCServo ServoY)
         {
-            string dir = AppDomain.CurrentDomain.BaseDirectory;
+            //string dir = AppDomain.CurrentDomain.BaseDirectory;
             //string dir = "../Output";
+
+            //salvar o output no diretorio Resultados
+            string dir = AppDomain.CurrentDomain.BaseDirectory;
+            dir = Path.Combine(dir, @"..\Resultados");
+
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
             string path = Path.Combine(dir, outputFile);
 
             Console.WriteLine("Scan initiated");
