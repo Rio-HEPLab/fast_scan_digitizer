@@ -2342,10 +2342,8 @@ InterruptTimeout:
     return -1;
 }
 
-
 int getAvgMaxValue(int numSamples)
 {
-
     int i, ch, Nb=0, Ne=0;
     int avgAmplitude = 0;
     uint32_t BufferSize, NumEvents;
@@ -2540,6 +2538,408 @@ InterruptTimeout:
                             avgAmplitude += amplitude; 
                             printf("%d",amplitude);
                             printf("%d",avgAmplitude);
+
+                        //*********************************************************************
+                    }
+        }
+    }
+    return avgAmplitude/numSamples;
+    QuitProgram:
+    return -1;
+}
+
+int getAvgMinValueInterval(int numSamples, int binStart, int binEnd)
+{
+    int i, ch, Nb=0, Ne=0;
+    int avgAmplitude = 0;
+    uint32_t BufferSize, NumEvents;
+    char *EventPtr = NULL;
+    uint64_t CurrentTime, PrevRateTime, ElapsedTime;
+    int nCycles= 0;
+    CAEN_DGTZ_EventInfo_t       EventInfo;
+
+        #ifdef  WIN32
+    sprintf(path, "%s\\WaveDump\\", getenv("USERPROFILE"));
+    _mkdir(path);
+    #else
+        sprintf(path, "");
+    #endif
+
+
+    WDrun.Restart = 0;
+    PrevRateTime = get_time();
+    /* *************************************************************************************** */
+    /* Readout Loop                                                                            */
+    /* *************************************************************************************** */
+    WDrun.SingleWrite = 1;
+    //printf("teste: %d", WDrun.SingleWrite);
+    //printf("pressione uma tecla para salvar um evento\n");
+    //getch();
+    //printf("pressionado");
+    CAEN_DGTZ_SWStartAcquisition(handle);
+    WDrun.AcqRun = 1;
+    int gr, j, Size;
+    int amplitude;
+    for(int k = 0; k<numSamples; k++) {	
+        
+        // Check for keyboard commands (key pressed)
+        //CheckKeyboardCommands(handle, &WDrun, &WDcfg, BoardInfo); //não vai precisar
+        
+
+        if (WDrun.AcqRun == 0)
+            continue;
+        
+
+        /* Send a software trigger */
+        if (WDrun.ContinuousTrigger) {
+            CAEN_DGTZ_SendSWtrigger(handle);
+        }
+
+        /* Wait for interrupt (if enabled) */
+        if (WDcfg.InterruptNumEvents > 0) {
+            int32_t boardId;
+            int VMEHandle = -1;
+            int InterruptMask = (1 << VME_INTERRUPT_LEVEL);
+
+            BufferSize = 0;
+            NumEvents = 0;
+            // Interrupt handling
+            if (isVMEDevice) {
+                ret = CAEN_DGTZ_VMEIRQWait ((CAEN_DGTZ_ConnectionType)WDcfg.LinkType, WDcfg.LinkNum, WDcfg.ConetNode, (uint8_t)InterruptMask, INTERRUPT_TIMEOUT, &VMEHandle);
+            }
+            else
+                ret = CAEN_DGTZ_IRQWait(handle, INTERRUPT_TIMEOUT);
+            if (ret == CAEN_DGTZ_Timeout)  // No active interrupt requests
+                goto InterruptTimeout;
+            if (ret != CAEN_DGTZ_Success)  {
+                ErrCode = ERR_INTERRUPT;
+                goto QuitProgram;
+            }
+            // Interrupt Ack
+            if (isVMEDevice) {
+                ret = CAEN_DGTZ_VMEIACKCycle(VMEHandle, VME_INTERRUPT_LEVEL, &boardId);
+                if ((ret != CAEN_DGTZ_Success) || (boardId != VME_INTERRUPT_STATUS_ID)) {
+                    goto InterruptTimeout;
+                } else {
+                    if (INTERRUPT_MODE == CAEN_DGTZ_IRQ_MODE_ROAK)
+                        ret = CAEN_DGTZ_RearmInterrupt(handle);
+                }
+            }
+        }
+
+        /* Read data from the board */
+         ret = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &BufferSize);
+        if (ret) {
+
+            ErrCode = ERR_READOUT;
+            goto QuitProgram;
+        }
+        NumEvents = 0;
+        if (BufferSize != 0) {
+            ret = CAEN_DGTZ_GetNumEvents(handle, buffer, BufferSize, &NumEvents);
+            if (ret) {
+                ErrCode = ERR_READOUT;
+                goto QuitProgram;
+            }
+        }
+		else {
+			uint32_t lstatus;
+			ret = CAEN_DGTZ_ReadRegister(handle, CAEN_DGTZ_ACQ_STATUS_ADD, &lstatus);
+			if (ret) {
+				printf("Warning: Failure reading reg:%x (%d)\n", CAEN_DGTZ_ACQ_STATUS_ADD, ret);
+			}
+			else {
+				if (lstatus & (0x1 << 19)) {
+					ErrCode = ERR_OVERTEMP;
+					goto QuitProgram;
+				}
+			}
+		}
+
+InterruptTimeout:
+        /* Calculate throughput and trigger rate (every second) */
+        Nb += BufferSize;
+        Ne += NumEvents;
+        CurrentTime = get_time();
+        ElapsedTime = CurrentTime - PrevRateTime;
+
+        nCycles++;
+        if (ElapsedTime > 1000) {
+            if (Nb == 0)
+                if (ret == CAEN_DGTZ_Timeout) printf ("Timeout...\n"); else printf("No data...\n");
+            else
+                printf("Reading at %.2f MB/s (Trg Rate: %.2f Hz)\n", (float)Nb/((float)ElapsedTime*1048.576f), (float)Ne*1000.0f/(float)ElapsedTime);
+            nCycles= 0;
+            Nb = 0;
+            Ne = 0;
+            PrevRateTime = CurrentTime;
+        }
+
+        /* Analyze data */
+        for(i = 0; i < (int)NumEvents; i++) {
+
+            /* Get one event from the readout buffer */
+            ret = CAEN_DGTZ_GetEventInfo(handle, buffer, BufferSize, i, &EventInfo, &EventPtr);
+            if (ret) {
+                ErrCode = ERR_EVENT_BUILD;
+                goto QuitProgram;
+            }
+            /* decode the event */
+            if (WDcfg.Nbit == 8) 
+                ret = CAEN_DGTZ_DecodeEvent(handle, EventPtr, (void**)&Event8);
+            else
+                if (BoardInfo.FamilyCode != CAEN_DGTZ_XX742_FAMILY_CODE) {
+                    ret = CAEN_DGTZ_DecodeEvent(handle, EventPtr, (void**)&Event16);
+                }
+                else {
+                    ret = CAEN_DGTZ_DecodeEvent(handle, EventPtr, (void**)&Event742);
+                    if (WDcfg.useCorrections != -1) { // if manual corrections (não é usado)
+                        uint32_t gr;
+                        for (gr = 0; gr < WDcfg.MaxGroupNumber; gr++) {
+                            if ( ((WDcfg.EnableMask >> gr) & 0x1) == 0)
+                                continue;
+                            ApplyDataCorrection( &(X742Tables[gr]), WDcfg.DRS4Frequency, WDcfg.useCorrections, &(Event742->DataGroup[gr]));
+                        }
+                    }
+                }
+                if (ret) {
+                    ErrCode = ERR_EVENT_BUILD;
+                    goto QuitProgram;
+                }
+
+                //*********************************************************************
+                //encontra o valor da baseline
+                ch=0;
+                gr=0;
+                int Size = Event742->DataGroup[gr].ChSize[ch];
+                            
+                int baseline100 = 0;
+                //printf("\npara 100 ultimos valores: ");
+                for(i = Size; i>= Size - 100; i--){
+                    baseline100 +=  Event742->DataGroup[gr].DataChannel[ch][i];
+                }
+                baseline100 = baseline100/100;
+                            //printf("%d", baseline100);
+
+                int minval = 0xFFFF;
+                int val = 0;
+                for(i=binStart; i<binEnd; i++){
+                    val = Event742->DataGroup[gr].DataChannel[ch][i];
+                    if(val<minval) minval = val;
+                }
+
+                            //printf("\no menor valor eh: %d\n", minval);
+
+                amplitude = abs(baseline100 - minval);
+                            //printf("Amplitude = %d", amplitude);
+                            //printf("A amplitude eh de: %d\n", amplitude);
+
+                avgAmplitude += amplitude; 
+                //*********************************************************************
+        }
+    }
+    CAEN_DGTZ_SWStopAcquisition(handle);
+    return avgAmplitude/numSamples;
+    QuitProgram:
+    return -1;
+}
+
+int getAvgMinValueInterval(int numSamples, int binStart, int binEnd)
+{
+    int i, ch, Nb=0, Ne=0;
+    int avgAmplitude = 0;
+    uint32_t BufferSize, NumEvents;
+    char *EventPtr = NULL;
+    uint64_t CurrentTime, PrevRateTime, ElapsedTime;
+    int nCycles= 0;
+    CAEN_DGTZ_EventInfo_t       EventInfo;
+
+        #ifdef  WIN32
+    sprintf(path, "%s\\WaveDump\\", getenv("USERPROFILE"));
+    _mkdir(path);
+    #else
+        sprintf(path, "");
+    #endif
+
+
+    WDrun.Restart = 0;
+    PrevRateTime = get_time();
+    /* *************************************************************************************** */
+    /* Readout Loop                                                                            */
+    /* *************************************************************************************** */
+    WDrun.SingleWrite = 1;
+    //printf("teste: %d", WDrun.SingleWrite);
+    //printf("pressione uma tecla para salvar um evento\n");
+    //getch();
+    //printf("pressionado");
+    CAEN_DGTZ_SWStartAcquisition(handle);
+    WDrun.AcqRun = 1;
+    int gr, j, Size;
+    int amplitude;
+    for(int k = 0; k<numSamples; k++) {	
+        
+        // Check for keyboard commands (key pressed)
+        //CheckKeyboardCommands(handle, &WDrun, &WDcfg, BoardInfo); //não vai precisar
+        
+
+        if (WDrun.AcqRun == 0)
+            continue;
+        
+
+        /* Send a software trigger */
+        if (WDrun.ContinuousTrigger) {
+            CAEN_DGTZ_SendSWtrigger(handle);
+        }
+
+        /* Wait for interrupt (if enabled) */
+        if (WDcfg.InterruptNumEvents > 0) {
+            int32_t boardId;
+            int VMEHandle = -1;
+            int InterruptMask = (1 << VME_INTERRUPT_LEVEL);
+
+            BufferSize = 0;
+            NumEvents = 0;
+            // Interrupt handling
+            if (isVMEDevice) {
+                ret = CAEN_DGTZ_VMEIRQWait ((CAEN_DGTZ_ConnectionType)WDcfg.LinkType, WDcfg.LinkNum, WDcfg.ConetNode, (uint8_t)InterruptMask, INTERRUPT_TIMEOUT, &VMEHandle);
+            }
+            else
+                ret = CAEN_DGTZ_IRQWait(handle, INTERRUPT_TIMEOUT);
+            if (ret == CAEN_DGTZ_Timeout)  // No active interrupt requests
+                goto InterruptTimeout;
+            if (ret != CAEN_DGTZ_Success)  {
+                ErrCode = ERR_INTERRUPT;
+                goto QuitProgram;
+            }
+            // Interrupt Ack
+            if (isVMEDevice) {
+                ret = CAEN_DGTZ_VMEIACKCycle(VMEHandle, VME_INTERRUPT_LEVEL, &boardId);
+                if ((ret != CAEN_DGTZ_Success) || (boardId != VME_INTERRUPT_STATUS_ID)) {
+                    goto InterruptTimeout;
+                } else {
+                    if (INTERRUPT_MODE == CAEN_DGTZ_IRQ_MODE_ROAK)
+                        ret = CAEN_DGTZ_RearmInterrupt(handle);
+                }
+            }
+        }
+
+        /* Read data from the board */
+         ret = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &BufferSize);
+        if (ret) {
+
+            ErrCode = ERR_READOUT;
+            goto QuitProgram;
+        }
+        NumEvents = 0;
+        if (BufferSize != 0) {
+            ret = CAEN_DGTZ_GetNumEvents(handle, buffer, BufferSize, &NumEvents);
+            if (ret) {
+                ErrCode = ERR_READOUT;
+                goto QuitProgram;
+            }
+        }
+		else {
+			uint32_t lstatus;
+			ret = CAEN_DGTZ_ReadRegister(handle, CAEN_DGTZ_ACQ_STATUS_ADD, &lstatus);
+			if (ret) {
+				printf("Warning: Failure reading reg:%x (%d)\n", CAEN_DGTZ_ACQ_STATUS_ADD, ret);
+			}
+			else {
+				if (lstatus & (0x1 << 19)) {
+					ErrCode = ERR_OVERTEMP;
+					goto QuitProgram;
+				}
+			}
+		}
+
+InterruptTimeout:
+        /* Calculate throughput and trigger rate (every second) */
+        Nb += BufferSize;
+        Ne += NumEvents;
+        CurrentTime = get_time();
+        ElapsedTime = CurrentTime - PrevRateTime;
+
+        nCycles++;
+        if (ElapsedTime > 1000) {
+            if (Nb == 0)
+                if (ret == CAEN_DGTZ_Timeout) printf ("Timeout...\n"); else printf("No data...\n");
+            else
+                printf("Reading at %.2f MB/s (Trg Rate: %.2f Hz)\n", (float)Nb/((float)ElapsedTime*1048.576f), (float)Ne*1000.0f/(float)ElapsedTime);
+            nCycles= 0;
+            Nb = 0;
+            Ne = 0;
+            PrevRateTime = CurrentTime;
+        }
+
+        /* Analyze data */
+        for(i = 0; i < (int)NumEvents; i++) {
+
+            /* Get one event from the readout buffer */
+            ret = CAEN_DGTZ_GetEventInfo(handle, buffer, BufferSize, i, &EventInfo, &EventPtr);
+            if (ret) {
+                ErrCode = ERR_EVENT_BUILD;
+                goto QuitProgram;
+            }
+            /* decode the event */
+            if (WDcfg.Nbit == 8) 
+                ret = CAEN_DGTZ_DecodeEvent(handle, EventPtr, (void**)&Event8);
+            else
+                if (BoardInfo.FamilyCode != CAEN_DGTZ_XX742_FAMILY_CODE) {
+                    ret = CAEN_DGTZ_DecodeEvent(handle, EventPtr, (void**)&Event16);
+                }
+                else {
+                    ret = CAEN_DGTZ_DecodeEvent(handle, EventPtr, (void**)&Event742);
+                    if (WDcfg.useCorrections != -1) { // if manual corrections (não é usado)
+                        uint32_t gr;
+                        for (gr = 0; gr < WDcfg.MaxGroupNumber; gr++) {
+                            if ( ((WDcfg.EnableMask >> gr) & 0x1) == 0)
+                                continue;
+                            ApplyDataCorrection( &(X742Tables[gr]), WDcfg.DRS4Frequency, WDcfg.useCorrections, &(Event742->DataGroup[gr]));
+                        }
+                    }
+                }
+                if (ret) {
+                    ErrCode = ERR_EVENT_BUILD;
+                    goto QuitProgram;
+                }
+
+                    if (WDrun.SingleWrite) {
+                        printf("Single Event saved to output files\n");
+                        WDrun.SingleWrite = 0;
+                        CAEN_DGTZ_SWStopAcquisition(handle);
+                        printf("Aquisicao parada\n");
+                        //*********************************************************************
+                        //encontra o valor da baseline
+                            ch=0;
+                            gr=0;
+                            int Size = Event742->DataGroup[gr].ChSize[ch];
+                            
+                            int baseline100 = 0;
+                            //printf("\npara 100 ultimos valores: ");
+                            for(i = Size; i>= Size - 100; i--){
+                                baseline100 +=  Event742->DataGroup[gr].DataChannel[ch][i];
+                            }
+                                baseline100 = baseline100/100;
+                            //printf("%d", baseline100);
+
+                            //encontra o valor maximo
+                            int maxval = 0;
+                            int val = 0;
+                            for(i=binStart; i<binEnd; i++){
+                                val = Event742->DataGroup[gr].DataChannel[ch][i];
+                                if(val>maxval) maxval = val;
+                            }
+
+                            //printf("\no menor valor eh: %d\n", maxval);
+
+                            //Encontra a amplitude em relacao a baseline
+                            int amplitude;
+                            amplitude = abs(baseline100 - maxval);
+                            //printf("A amplitude eh de: %d\n", amplitude);
+
+                            avgAmplitude += amplitude; 
+                            //printf("%d",amplitude);
+                            //printf("%d",avgAmplitude);
 
                         //*********************************************************************
                     }
