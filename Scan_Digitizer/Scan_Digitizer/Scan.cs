@@ -347,7 +347,9 @@ namespace Scan_Digitizer
                 getPaceX();
                 //define o valor do passo em y
                 getPaceY();
-
+                //define polaridade do pulso
+                setPulsePolarity();
+                //se optar por escolher intervalo de aquisição, define limites, caso contrário usa default
                 Console.WriteLine("Determine acquisition interval?");
                 if (Confirmation())
                 {
@@ -420,8 +422,12 @@ namespace Scan_Digitizer
 
                     for (int j = 0; j <= numStepsX; j++)
                     {
-                        amplitude = Digitizer.GetAvgMinValueInterval(100, intervalBinStart, intervalBinEnd);
-                        //amplitude = Digitizer.GetMinValue();
+                        //Se o pulso é negativo pega valor minimo, se positivo pega o valor máximo
+                        if(negativePulse)
+                            amplitude = Digitizer.GetAvgMinValueInterval(100, intervalBinStart, intervalBinEnd);
+                        else
+                            amplitude = Digitizer.GetAvgMaxValueInterval(100, intervalBinStart, intervalBinEnd);
+
                         PositionX = j * stepX;
 
                         Console.WriteLine("Amplitude: " + amplitude);
