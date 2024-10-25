@@ -277,10 +277,12 @@ namespace Scan_Digitizer
                 if (String.Equals(input, "p", StringComparison.OrdinalIgnoreCase))
                 {
                     negativePulse = false;
+                    return;
                 }
                 else if (String.Equals(input, "n", StringComparison.OrdinalIgnoreCase))
                 {
                     negativePulse = true;
+                    return;
                 }
                 else { continue; }
             }
