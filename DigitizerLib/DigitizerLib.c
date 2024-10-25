@@ -2744,7 +2744,7 @@ InterruptTimeout:
     return -1;
 }
 
-int getAvgMinValueInterval(int numSamples, int binStart, int binEnd)
+int getAvgMaxValueInterval(int numSamples, int binStart, int binEnd)
 {
     int i, ch, Nb=0, Ne=0;
     int avgAmplitude = 0;

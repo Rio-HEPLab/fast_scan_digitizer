@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-fileName = "scan_Digitizer_50x50.txt"
+fileName = "novoBuraco31x31.txt"
 #abre o arquivo e salva as duas primeiras linhas como strings
 with open(fileName) as file:
     line1 = file.readline().strip()

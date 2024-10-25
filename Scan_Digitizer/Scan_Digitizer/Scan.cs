@@ -28,6 +28,9 @@ namespace Scan_Digitizer
         string input;
         string outputFile = "scan_Digitizer.txt";
         bool runHome = true;
+        int intervalBinStart = 0;
+        int intervalBinEnd = 1024;
+        bool negativePulse = true;
 
         private bool Confirmation()
         {
@@ -212,6 +215,77 @@ namespace Scan_Digitizer
             }
         }
 
+        private void setAcquisitionIntervalInit()
+        {   
+            bool error = true;
+            while (error)
+            {
+                Console.WriteLine("Set initial bin: ");
+                input = Console.ReadLine();
+
+                if (int.TryParse(input, out intervalBinStart))
+                {
+                    if (intervalBinStart >= 0) //valor minimo para inicio
+                    {
+                        error = !error;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Initial bin must be greater or equal to 0");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Entrada inválida. Certifique-se de digitar um número válido.\n");
+                }
+            }
+        }
+
+        private void setAcquisitionIntervalFinal()
+        {
+            bool error = true;
+            while (error)
+            {
+                Console.WriteLine("Set final bin: ");
+                input = Console.ReadLine();
+
+                if (int.TryParse(input, out intervalBinEnd))
+                {
+                    if (intervalBinStart < 1024) //valor maximo para fim
+                    {
+                        error = !error;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Final bin must be less than 1024");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Entrada inválida. Certifique-se de digitar um número válido.\n");
+                }
+            }
+        }
+
+        private void setPulsePolarity()
+        {
+            while (true)
+            {
+                Console.WriteLine("Choose pulse polarity (p/n): ");
+                input = Console.ReadLine();
+
+                if (String.Equals(input, "p", StringComparison.OrdinalIgnoreCase))
+                {
+                    negativePulse = false;
+                }
+                else if (String.Equals(input, "n", StringComparison.OrdinalIgnoreCase))
+                {
+                    negativePulse = true;
+                }
+                else { continue; }
+            }
+        }
+
         private void nameOutputFile()   //da o nome para o arquivo de output
         {
             Console.Write("Please name your output file (without extension): ");
@@ -255,7 +329,6 @@ namespace Scan_Digitizer
             Thread.Sleep(500);
         }
 
-
         public void GetParameters()
         {
             bool confirmation = false;
@@ -274,9 +347,22 @@ namespace Scan_Digitizer
                 getPaceX();
                 //define o valor do passo em y
                 getPaceY();
+
+                Console.WriteLine("Determine acquisition interval?");
+                if (Confirmation())
+                {
+                    setAcquisitionIntervalInit();
+                    setAcquisitionIntervalFinal();
+                }
+                else
+                {
+                    int intervalBinStart = 0;
+                    int intervalBinEnd = 1024;
+                }
                 //pede confirmação dos parâmetros
                 Console.Write("Confirm parameters? [Yes/No]: ");
                 confirmation = Confirmation();
+
             }
             //pede nome para o arquivo de output
             nameOutputFile();
@@ -334,7 +420,7 @@ namespace Scan_Digitizer
 
                     for (int j = 0; j <= numStepsX; j++)
                     {
-                        amplitude = Digitizer.GetAvgMinValue(100);
+                        amplitude = Digitizer.GetAvgMinValueInterval(100, intervalBinStart, intervalBinEnd);
                         //amplitude = Digitizer.GetMinValue();
                         PositionX = j * stepX;
 

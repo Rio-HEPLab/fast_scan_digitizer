@@ -26,5 +26,11 @@ namespace Scan_Digitizer
 
         [DllImport("DigitizerLib.dll", EntryPoint = "getAvgMaxValue")]
         public static extern int GetAvgMaxValue(int numSamples);
+
+        [DllImport("DigitizerLib.dll", EntryPoint = "getAvgMaxValueInterval")]
+        public static extern int GetAvgMaxValueInterval(int numSamples, int binStart, int binEnd);
+
+        [DllImport("DigitizerLib.dll", EntryPoint = "getAvgMinValueInterval")]
+        public static extern int GetAvgMinValueInterval(int numSamples, int binStart, int binEnd);
     }
 }
