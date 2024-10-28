@@ -1335,11 +1335,11 @@ int ConfigureDigitizer()
 				ErrCode = ERR_CONF_FILE_NOT_FOUND;
 				goto QuitProgram;
 			}
-            printf("Checkpoint 0\n");
+            //printf("Checkpoint 0\n");
 			ParseConfigFile(f_ini, &WDcfg);
 			fclose(f_ini);
 
-            printf("\nCheckpoint 1\n");
+            //printf("\nCheckpoint 1\n");
 		}
 
     // Get Number of Channels, Number of bits, Number of Groups of the board */
@@ -1349,7 +1349,7 @@ int ConfigureDigitizer()
         goto QuitProgram;
     }
 
-    printf("Checkpoint 2\n");
+    //printf("Checkpoint 2\n");
 
 	//Check for possible board internal errors
 	ret = CheckBoardFailureStatus(handle);
@@ -1377,7 +1377,7 @@ int ConfigureDigitizer()
     if (WDcfg.StartupCalibration)
         calibrate(handle, &WDrun, BoardInfo);
 
-    printf("Checkpoint 3\n");
+    //printf("Checkpoint 3\n");
 
 Restart:
     // mask the channels not available for this model
@@ -1404,7 +1404,7 @@ Restart:
     /* *************************************************************************************** */
     /* program the digitizer                                                                   */
     /* *************************************************************************************** */
-    printf("Checkpoint 4\n");
+    //printf("Checkpoint 4\n");
     ret = ProgramDigitizer(handle, WDcfg, BoardInfo);
     if (ret) {
         ErrCode = ERR_DGZ_PROGRAM;
@@ -1419,7 +1419,7 @@ Restart:
 		ErrCode = ERR_BOARD_FAILURE;
 		goto QuitProgram;
 	}
-    printf("Checkpoint 5\n");
+    //printf("Checkpoint 5\n");
 
     // Select the next enabled group for plotting
     if ((WDcfg.EnableMask) && (BoardInfo.FamilyCode == CAEN_DGTZ_XX742_FAMILY_CODE || BoardInfo.FamilyCode == CAEN_DGTZ_XX740_FAMILY_CODE))
@@ -1506,7 +1506,7 @@ Restart:
 		CAEN_DGTZ_SWStartAcquisition(handle);
 	}
     else
-        printf("[s] start/stop the acquisition, [q] quit, [SPACE] help\n");
+        //printf("[s] start/stop the acquisition, [q] quit, [SPACE] help\n");
 
     return 0;
 
@@ -1940,6 +1940,7 @@ int getMaxValue()
         sprintf(path, "");
     #endif
 
+    int amplitude;
 
     WDrun.Restart = 0;
     PrevRateTime = get_time();
@@ -2107,12 +2108,11 @@ InterruptTimeout:
                             printf("\no menor valor eh: %d\n", maxval);
 
                             //Encontra a amplitude em relacao a baseline
-                            int amplitude;
                             amplitude = abs(baseline100 - maxval);
-                            printf("A amplitude eh de: %d\n", amplitude);
+                            //printf("A amplitude eh de: %d\n", amplitude);
                         //*********************************************************************
                     }
-        return 0;
+        return amplitude;
         QuitProgram:
         return 1;
         }
@@ -2501,46 +2501,41 @@ InterruptTimeout:
                     goto QuitProgram;
                 }
 
-                    if (WDrun.SingleWrite) {
-                        printf("Single Event saved to output files\n");
-                        WDrun.SingleWrite = 0;
-                        CAEN_DGTZ_SWStopAcquisition(handle);
-                        printf("Aquisicao parada\n");
-                        //*********************************************************************
-                        //encontra o valor da baseline
-                            ch=0;
-                            gr=0;
-                            int Size = Event742->DataGroup[gr].ChSize[ch];
-                            
-                            int baseline100 = 0;
-                            //printf("\npara 100 ultimos valores: ");
-                            for(i = Size; i>= Size - 100; i--){
-                                baseline100 +=  Event742->DataGroup[gr].DataChannel[ch][i];
-                            }
-                                baseline100 = baseline100/100;
-                            //printf("%d", baseline100);
+                //*********************************************************************
+                //encontra o valor da baseline
+                ch=0;
+                gr=0;
+                int Size = Event742->DataGroup[gr].ChSize[ch];
+                
+                int baseline100 = 0;
+                //printf("\npara 100 ultimos valores: ");
+                for(i = Size; i>= Size - 100; i--){
+                    baseline100 +=  Event742->DataGroup[gr].DataChannel[ch][i];
+                }
+                    baseline100 = baseline100/100;
+                //printf("%d", baseline100);
 
-                            //encontra o valor maximo
-                            int maxval = 0;
-                            int val = 0;
-                            for(i=0; i<Size; i++){
-                                val = Event742->DataGroup[gr].DataChannel[ch][i];
-                                if(val>maxval) maxval = val;
-                            }
+                //encontra o valor maximo
+                int maxval = 0;
+                int val = 0;
+                for(i=0; i<Size; i++){
+                    val = Event742->DataGroup[gr].DataChannel[ch][i];
+                    if(val>maxval) maxval = val;
+                }
 
-                            //printf("\no menor valor eh: %d\n", maxval);
+                //printf("\no menor valor eh: %d\n", maxval);
 
-                            //Encontra a amplitude em relacao a baseline
-                            int amplitude;
-                            amplitude = abs(baseline100 - maxval);
-                            //printf("A amplitude eh de: %d\n", amplitude);
+                //Encontra a amplitude em relacao a baseline
+                int amplitude;
+                amplitude = abs(baseline100 - maxval);
+                //printf("A amplitude eh de: %d\n", amplitude);
 
-                            avgAmplitude += amplitude; 
-                            printf("%d",amplitude);
-                            printf("%d",avgAmplitude);
+                avgAmplitude += amplitude; 
+                //printf("%d",amplitude);
+                //printf("%d",avgAmplitude);
 
-                        //*********************************************************************
-                    }
+                //*********************************************************************
+                
         }
     }
     return avgAmplitude/numSamples;
@@ -2903,46 +2898,42 @@ InterruptTimeout:
                     goto QuitProgram;
                 }
 
-                    if (WDrun.SingleWrite) {
-                        printf("Single Event saved to output files\n");
-                        WDrun.SingleWrite = 0;
-                        CAEN_DGTZ_SWStopAcquisition(handle);
-                        printf("Aquisicao parada\n");
-                        //*********************************************************************
-                        //encontra o valor da baseline
-                            ch=0;
-                            gr=0;
-                            int Size = Event742->DataGroup[gr].ChSize[ch];
-                            
-                            int baseline100 = 0;
-                            //printf("\npara 100 ultimos valores: ");
-                            for(i = Size; i>= Size - 100; i--){
-                                baseline100 +=  Event742->DataGroup[gr].DataChannel[ch][i];
-                            }
-                                baseline100 = baseline100/100;
-                            //printf("%d", baseline100);
+                    
+                //*********************************************************************
+                //encontra o valor da baseline
+                ch=0;
+                gr=0;
+                int Size = Event742->DataGroup[gr].ChSize[ch];
+                
+                int baseline100 = 0;
+                //printf("\npara 100 ultimos valores: ");
+                for(i = Size; i>= Size - 100; i--){
+                    baseline100 +=  Event742->DataGroup[gr].DataChannel[ch][i];
+                }
+                    baseline100 = baseline100/100;
+                //printf("%d", baseline100);
 
-                            //encontra o valor maximo
-                            int maxval = 0;
-                            int val = 0;
-                            for(i=binStart; i<binEnd; i++){
-                                val = Event742->DataGroup[gr].DataChannel[ch][i];
-                                if(val>maxval) maxval = val;
-                            }
+                //encontra o valor maximo
+                int maxval = 0;
+                int val = 0;
+                for(i=binStart; i<binEnd; i++){
+                    val = Event742->DataGroup[gr].DataChannel[ch][i];
+                    if(val>maxval) maxval = val;
+                }
 
-                            //printf("\no menor valor eh: %d\n", maxval);
+                //printf("\no menor valor eh: %d\n", maxval);
 
-                            //Encontra a amplitude em relacao a baseline
-                            int amplitude;
-                            amplitude = abs(baseline100 - maxval);
-                            //printf("A amplitude eh de: %d\n", amplitude);
+                //Encontra a amplitude em relacao a baseline
+                int amplitude;
+                amplitude = abs(baseline100 - maxval);
+                //printf("A amplitude eh de: %d\n", amplitude);
 
-                            avgAmplitude += amplitude; 
-                            //printf("%d",amplitude);
-                            //printf("%d",avgAmplitude);
+                avgAmplitude += amplitude; 
+                //printf("%d",amplitude);
+                //printf("%d",avgAmplitude);
 
-                        //*********************************************************************
-                    }
+                //*********************************************************************
+                    
         }
     }
     return avgAmplitude/numSamples;
